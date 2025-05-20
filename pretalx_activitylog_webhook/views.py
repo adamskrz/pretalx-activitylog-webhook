@@ -4,9 +4,7 @@ from django.views.generic import FormView
 
 from pretalx.common.views.mixins import PermissionRequired
 
-
 from .forms import ActivitylogWebhookSettingsForm
-
 
 class ActivitylogWebhookSettingsView(PermissionRequired, FormView):
     permission_required = "event.update_event"
@@ -24,7 +22,13 @@ class ActivitylogWebhookSettingsView(PermissionRequired, FormView):
         kwargs["event"] = self.request.event
         return kwargs
 
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        # Pass POST data to the formset during validation
+        result = self.form_valid(form) if form.is_valid() else self.form_invalid(form)
+        return result
+
     def form_valid(self, form):
         form.save()
-        messages.success(self.request, _("The ActivityLog Webhook plugin settings were updated."))
+        messages.success(self.request, _("The pretalx ActvityLog webhook plugin settings were updated."))
         return super().form_valid(form)

@@ -36,3 +36,6 @@ include = ["pretalx*"]
 
 [tool.check-manifest]
 ignore = [".*"]
+
+[tool.ruff]
+line-length = 120

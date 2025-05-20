@@ -1,0 +1,6 @@
+recursive-include pretalx_activitylog_webhook/static *
+recursive-include pretalx_activitylog_webhook/templates *
+exclude pretalx_activitylog_webhook/locale/django.pot
+recursive-include pretalx_activitylog_webhook/locale *
+recursive-include pretalx_activitylog_webhook *.py
+include Makefile

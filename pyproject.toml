@@ -1,0 +1,38 @@
+[project]
+name = "pretalx-activitylog-webhook"
+dynamic = ["version"]
+description = "pretalx plugin for ActivityLog Webhook"
+readme = "README.rst"
+license = {text = "Apache Software License"}
+keywords = ["pretalx"]
+authors = [
+  {name = "Adam Skrzymowski", email = "adam.skrzymowski@gmail.com"},
+]
+maintainers = [
+  {name = "Adam Skrzymowski", email = "adam.skrzymowski@gmail.com"},
+]
+
+dependencies = []
+
+[project.urls]
+homepage = "https://github.com/adam.skrzymowski/pretalx-activitylog-webhook"
+repository = "https://github.com/adam.skrzymowski/pretalx-activitylog-webhook.git"
+
+[project.entry-points."pretalx.plugin"]
+pretalx_activitylog_webhook = "pretalx_activitylog_webhook:PretalxPluginMeta"
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "pretalx_activitylog_webhook.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["pretalx*"]
+
+[tool.check-manifest]
+ignore = [".*"]

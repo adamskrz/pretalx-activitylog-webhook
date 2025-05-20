@@ -4,12 +4,13 @@ from django.views.generic import FormView
 
 from pretalx.common.views.mixins import PermissionRequired
 
-from .forms import ActivitylogWebhookSettingsForm
+from .forms import ActivitylogWebhookSettingsForm, WebhookFormSet
 
 class ActivitylogWebhookSettingsView(PermissionRequired, FormView):
     permission_required = "event.update_event"
     template_name = "pretalx_activitylog_webhook/settings.html"
-    form_class = ActivitylogWebhookSettingsForm
+    # form_class = ActivitylogWebhookSettingsForm
+    form_class = WebhookFormSet
 
     def get_success_url(self):
         return self.request.path
@@ -19,7 +20,8 @@ class ActivitylogWebhookSettingsView(PermissionRequired, FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["event"] = self.request.event
+        # kwargs["event"] = self.request.event
+        kwargs["instance"] = self.get_object()
         return kwargs
 
     def post(self, request, *args, **kwargs):

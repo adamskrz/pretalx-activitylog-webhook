@@ -1,4 +1,3 @@
-
 from django import forms
 from i18nfield.forms import I18nModelForm
 
@@ -6,11 +5,15 @@ from pretalx.common.forms.widgets import EnhancedSelectMultiple
 from pretalx.common.log_display import LOG_NAMES
 from pretalx.event.models import Event
 
-from .models import ActivitylogWebhookSettings, WebhookActionType, Webhook
+from .models import Webhook, ActivitylogWebhookSettings
+
+class WebhookForm(I18nModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields['action_types'].initial = self.instance.action_types
 
 
-
-class WebhookForm(forms.ModelForm):
     action_types = forms.MultipleChoiceField(
         choices=LOG_NAMES.items(),
         widget=EnhancedSelectMultiple,
@@ -18,6 +21,16 @@ class WebhookForm(forms.ModelForm):
         label="Activity Types",
         help_text="Select which activity types should trigger this webhook",
     )
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        # Save instance first if not yet saved (so it has a PK)
+        if commit:
+            instance.save()
+        # Update action_types M2M
+        action_types = self.cleaned_data.get('action_types', [])
+        instance.set_action_types(action_types)
+        return instance
 
     class Meta:
         model = Webhook
@@ -35,6 +48,7 @@ WebhookFormSet = forms.inlineformset_factory(
     extra=1,
     can_delete=True,
 )
+
 
 class ActivitylogWebhookSettingsForm(I18nModelForm):
     action_types = forms.MultipleChoiceField(

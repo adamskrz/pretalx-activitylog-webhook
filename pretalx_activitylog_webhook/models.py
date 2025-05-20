@@ -6,8 +6,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models.fields import DateTimeField
 
-from pretalx.common.log_display import LOG_NAMES
-
 
 class ActivitylogWebhookSettings(models.Model):
     event = models.OneToOneField(
@@ -31,22 +29,33 @@ class Webhook(models.Model):
     created = DateTimeField(auto_now_add=True)
     modified = DateTimeField(auto_now=True)
 
+    @property
+    def action_types(self):
+        # returns a simple list of strings
+        return list(self._action_types.values_list("action_type", flat=True))
+
+    def set_action_types(self, new_list):
+        self._action_types.all().delete()
+        objs = [WebhookActionType(webhook=self, action_type=at) for at in new_list]
+        WebhookActionType.objects.bulk_create(objs)
+
     def __str__(self):
         return f"id={self.id} active={self.active}"
+
 
 class WebhookActionType(models.Model):  # type: ignore
     webhook = models.ForeignKey(
         Webhook,
         on_delete=models.CASCADE,
-        related_name='action_types',
+        related_name="_action_types",
     )
     action_type = models.CharField(
         max_length=200,
-        choices=LOG_NAMES,
+        # choices=LOG_NAMES,
     )
 
     class Meta:
-        unique_together = ('webhook', 'action_type')
+        unique_together = ("webhook", "action_type")
 
     def __str__(self):
         return f"{self.webhook} - {self.action_type}"
@@ -81,7 +90,6 @@ class WebhookEvent(models.Model):
         encoder=DjangoJSONEncoder,
         editable=False,
     )
-    object_type = models.CharField(max_length=50, null=True, editable=False)
     STATES = [
         (states.PENDING, states.PENDING),
         (states.FAILURE, states.FAILURE),

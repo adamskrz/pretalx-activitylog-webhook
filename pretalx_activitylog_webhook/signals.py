@@ -13,8 +13,6 @@ from .models import Webhook
 from .settings import get_settings
 from .tasks import fire_webhook
 
-# from .util import cache
-
 
 @receiver(nav_event_settings)
 def pretalx_activitylog_webhook_settings(sender, request, **kwargs):
@@ -46,6 +44,8 @@ def handle_activitylog_save(sender, instance, created=False, **kwargs):
         user_str += instance.person.get_display_name()
         user_str += " (organiser) " if instance.is_orga_action else ""
 
+    # This is particularly janky, but display_object is a html string, so we need to parse it to get the url and text
+    # content. If provided by a plugin, it, might not work.
     object_html = instance.display_object
     match = re.match(r'^(.*?)\s*<a href="([^"]+)">([^<]+)</a>$', object_html)
     url_path = None
@@ -95,21 +95,4 @@ def model_dict(model):
 
 
 def _find_webhooks(topic: str):
-    """
-    In tests and for smaller setups we don't want to cache the query.
-    """
-    if get_settings()["USE_CACHE"]:
-        return _query_webhooks_cached(topic)
-    return _query_webhooks(topic)
-
-
-# @cache(ttl=timedelta(minutes=1))
-def _query_webhooks_cached(topic: str):
-    """
-    Cache the calls to the database so we're not polling the db anytime a signal is triggered.
-    """
-    return _query_webhooks(topic)
-
-
-def _query_webhooks(topic: str):
     return Webhook.objects.filter(active=True, _action_types__action_type=topic).values_list("id", "uuid")

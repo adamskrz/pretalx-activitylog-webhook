@@ -5,14 +5,14 @@ from pretalx.common.forms.widgets import EnhancedSelectMultiple
 from pretalx.common.log_display import LOG_NAMES
 from pretalx.event.models import Event
 
-from .models import Webhook, ActivitylogWebhookSettings
+from .models import Webhook
+
 
 class WebhookForm(I18nModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.pk:
-            self.fields['action_types'].initial = self.instance.action_types
-
+            self.fields["action_types"].initial = self.instance.action_types
 
     action_types = forms.MultipleChoiceField(
         choices=LOG_NAMES.items(),
@@ -28,15 +28,15 @@ class WebhookForm(I18nModelForm):
         if commit:
             instance.save()
         # Update action_types M2M
-        action_types = self.cleaned_data.get('action_types', [])
+        action_types = self.cleaned_data.get("action_types", [])
         instance.set_action_types(action_types)
         return instance
 
     class Meta:
         model = Webhook
-        fields = ['url', 'active', 'action_types']
+        fields = ["url", "active", "action_types"]
         widgets = {
-            'url': forms.URLInput(attrs={'placeholder': 'https://example.com/webhook'}),
+            "url": forms.URLInput(attrs={"placeholder": "https://example.com/webhook"}),
         }
 
 
@@ -48,27 +48,3 @@ WebhookFormSet = forms.inlineformset_factory(
     extra=1,
     can_delete=True,
 )
-
-
-class ActivitylogWebhookSettingsForm(I18nModelForm):
-    action_types = forms.MultipleChoiceField(
-        choices=LOG_NAMES,
-        widget=EnhancedSelectMultiple,
-        required=True,
-        label="Activity Types",
-        help_text="Select which activity types should trigger this webhook",
-    )
-
-    def __init__(self, *args, event=None, **kwargs):
-        self.instance, _ = ActivitylogWebhookSettings.objects.get_or_create(event=event)
-        super().__init__(*args, **kwargs, instance=self.instance, locales=event.locales)
-
-        # formset = WebhookFormSet(instance=event)
-
-
-    class Meta:
-        model = ActivitylogWebhookSettings
-        fields = ("some_setting",)
-        widgets = {
-            'url': forms.URLInput(attrs={'placeholder': 'https://example.com/webhook'}),
-        }

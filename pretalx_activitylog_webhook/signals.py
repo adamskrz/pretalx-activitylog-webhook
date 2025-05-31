@@ -48,7 +48,8 @@ def handle_activitylog_save(sender, instance, created=False, **kwargs):
     # content. If provided by a plugin, it, might not work.
     object_html = instance.display_object
     match = re.match(r'^(.*?)\s*<a href="([^"]+)">([^<]+)</a>$', object_html)
-    url_path = None
+    url_path = ""
+    link_text = ""
     text_content = ""
 
     if match:

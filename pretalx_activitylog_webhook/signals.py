@@ -51,6 +51,7 @@ def handle_activitylog_save(sender, instance, created=False, **kwargs):
     url_path = ""
     link_text = ""
     text_content = ""
+    url = None
 
     if match:
         text_content = match.group(1).strip()
